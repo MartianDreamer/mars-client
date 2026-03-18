@@ -1,19 +1,22 @@
-import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { defineConfig } from 'vite'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
-  base: "./",
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] })
+  ],
   build: {
-    outDir: "../dist",
+    outDir: '../dist/assets',
     rollupOptions: {
       output: {
-        // Keeps filenames simple so extension.ts can find them easily
-        entryFileNames: `assets/[name].js`,
-        chunkFileNames: `assets/[name].js`,
-        assetFileNames: `assets/[name].[ext]`,
-      },
-    },
-  },
-});
+        // Ensure we get a single JS file for the extension to load easily
+        entryFileNames: `[name].js`,
+        chunkFileNames: `[name].js`,
+        assetFileNames: `[name].[ext]`
+      }
+    }
+  }
+})
