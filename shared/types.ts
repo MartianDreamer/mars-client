@@ -65,13 +65,5 @@ export interface Request {
     body?: string;
     url: string;
     file?: File;
-}
-
-export interface Response {
-    status: number;
-    headers: Headers;
-    body?: string;
-    statusText: string;
-    elapsedTime: number;
-    size?: number;
+    tags: string[];
 }

@@ -32,18 +32,6 @@ const emitChange = () => {
 };
 
 export const variablesService = {
-    // --- React Integration ---
-    subscribe(listener: () => void) {
-        listeners.push(listener);
-        return () => {
-            listeners = listeners.filter((l) => l !== listener);
-        };
-    },
-
-    getSnapshot() {
-        return variableStorage;
-    },
-
     resolve(key: string, depth = 0): string {
         if (depth > 20)
             throw new Error("Circular dependency detected", {

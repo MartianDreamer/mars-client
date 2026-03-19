@@ -1,10 +1,19 @@
+import { useState } from "react";
 import "./App.css";
-import { RequestForm } from "./components/request/RequestForm";
+import { RestRequestForm } from "./components/rest-request/RestRequestForm";
+import type { Request } from "../../shared/types";
 
 function App() {
+    const [request, setRequest] = useState<Request>({
+        method: "GET",
+        url: "",
+        headers: {},
+        tags: [],
+    });
+
     return (
         <>
-            <RequestForm />
+            <RestRequestForm request={request} setRequest={setRequest} />
         </>
     );
 }

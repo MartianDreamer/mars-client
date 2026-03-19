@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { type Headers, type Request, STANDARD_METHODS } from "../../types";
-import { KeyValueTab } from "./KeyValueTab";
-import type { Query } from "./types";
-import { BodyTab } from "./BodyTab";
+import {
+    type Headers,
+    type Request,
+    STANDARD_METHODS,
+} from "../../../../shared/types.js";
+import { KeyValueTab } from "./KeyValueTab.js";
+import type { Query } from "./types.js";
+import { BodyTab } from "./BodyTab.js";
 
-export const RequestForm = () => {
-    const [request, setRequest] = useState<Request>({
-        method: "GET",
-        url: "",
-        headers: {},
-    });
+export const RestRequestForm = ({
+    request,
+    setRequest,
+}: {
+    request: Request;
+    setRequest: (request: Request) => void;
+}) => {
     const [queries, setQueries] = useState<Query[]>([]);
 
     const [currentTab, setCurrentTab] = useState<Tab>("Query");
@@ -46,8 +51,7 @@ export const RequestForm = () => {
                     active: true,
                 });
             });
-            setQueries(queryList);
-            console.log("URL updated, queries synced");
+            setQueries([...queryList, ...queries.filter((q) => queryList.find((ql) => ql.key === q.key) === undefined)]);
         } catch (e) {
             console.log("Invalid URL");
         }
@@ -170,7 +174,9 @@ export const RequestForm = () => {
                         onChangeContent={(body) =>
                             setRequest({ ...request, body })
                         }
-                        onChangeFile={(file) => setRequest({ ...request, file })}
+                        onChangeFile={(file) =>
+                            setRequest({ ...request, file })
+                        }
                     />
                 )}
             </div>
