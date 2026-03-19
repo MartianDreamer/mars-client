@@ -55,15 +55,18 @@ export type HttpMethod = (typeof ALL_HTTP_METHODS)[number];
 
 export type BodyType = "none" | "text" | "json" | "form-data" | "binary";
 
-export type Headers = {
-    [key: string]: string;
-};
-
 export interface Request {
     method: HttpMethod;
-    headers: Headers;
+    headers: Query[];
     body?: string;
     url: string;
     file?: File;
     tags: string[];
+    queryParams: Query[];
+}
+
+export interface Query {
+    key: string;
+    value: string;
+    active: boolean;
 }

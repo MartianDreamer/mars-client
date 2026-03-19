@@ -7,7 +7,8 @@ function App() {
     const [request, setRequest] = useState<Request>({
         method: "GET",
         url: "",
-        headers: {},
+        headers: [],
+        queryParams: [],
         tags: [],
     });
 

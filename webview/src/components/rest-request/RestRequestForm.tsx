@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-    type Headers,
+    type Query,
     type Request,
     STANDARD_METHODS,
-} from "../../../../shared/types.js";
-import { KeyValueTab } from "./KeyValueTab.js";
-import type { Query } from "./types.js";
-import { BodyTab } from "./BodyTab.js";
+} from "../../../../shared/types";
+import { buildUrl } from "../../../../shared/util";
+import { BodyTab } from "./BodyTab";
+import { KeyValueTab } from "./KeyValueTab";
 
 export const RestRequestForm = ({
     request,
@@ -15,47 +15,12 @@ export const RestRequestForm = ({
     request: Request;
     setRequest: (request: Request) => void;
 }) => {
-    const [queries, setQueries] = useState<Query[]>([]);
-
     const [currentTab, setCurrentTab] = useState<Tab>("Query");
-
-    useEffect(() => {
-        try {
-            const url = new URL(request.url);
-            queries
-                .filter((q) => q.active)
-                .filter((q) => q.value.trim() !== "")
-                .filter((q) => url.searchParams.get(q.key) !== q.value)
-                .forEach((q) => url.searchParams.set(q.key, q.value));
-
-            if (url.toString() === request.url) {
-                return;
-            }
-            setRequest({
-                ...request,
-                url: url.toString(),
-            });
-        } catch (e) {
-            console.log("Invalid URL");
-        }
-    }, [queries]);
-
-    useEffect(() => {
-        try {
-            const url = new URL(request.url);
-            const queryList: Query[] = [];
-            url.searchParams.forEach((value, key) => {
-                queryList.push({
-                    key,
-                    value,
-                    active: true,
-                });
-            });
-            setQueries([...queryList, ...queries.filter((q) => queryList.find((ql) => ql.key === q.key) === undefined)]);
-        } catch (e) {
-            console.log("Invalid URL");
-        }
-    }, [request]);
+    const [editingUrl, setEditingUrl] = useState(false);
+    const [rawUrl, setRawUrl] = useState(request.url);
+    const displayUrl = useMemo(() => {
+        return buildUrl(request.url, request.queryParams);
+    }, [request.url, request.queryParams]);
 
     return (
         <>
@@ -89,36 +54,38 @@ export const RestRequestForm = ({
                     className="form-control"
                     aria-label="Text input with dropdown button"
                     placeholder="Enter URL"
-                    onChange={(e) =>
-                        setRequest({ ...request, url: e.target.value })
-                    }
-                    value={request.url}
-                    onBlur={(e) => {
-                        e.preventDefault();
-                        if (
-                            !request.url.startsWith("http://") &&
-                            !request.url.startsWith("https://")
-                        ) {
-                            setRequest({
-                                ...request,
-                                url: "http://" + request.url,
-                            });
-                        }
-                    }}
-                    onKeyUp={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
+                    onFocus={() => setEditingUrl(true)}
+                    onBlur={() => {
+                        const newQueries = parseQueryParams(rawUrl);
+                        const queryParams = [...request.queryParams];
+                        queryParams.forEach((q) => {
+                            if (newQueries.has(q.key)) {
+                                q.active = true;
+                                q.value = newQueries.get(q.key) || "";
+                            }
+                        });
+                        for (const [key, value] of newQueries.entries()) {
                             if (
-                                !request.url.startsWith("http://") &&
-                                !request.url.startsWith("https://")
+                                queryParams.find((q) => q.key === key) ===
+                                undefined
                             ) {
-                                setRequest({
-                                    ...request,
-                                    url: "http://" + request.url,
+                                queryParams.push({
+                                    active: true,
+                                    key,
+                                    value,
                                 });
                             }
                         }
+                        setRequest({
+                            ...request,
+                            url: parseBaseUrl(rawUrl),
+                            queryParams,
+                        });
+                        setRawUrl(parseBaseUrl(rawUrl))
+                        setEditingUrl(false);
                     }}
+                    onChange={(e) => setRawUrl(e.target.value)}
+                    value={editingUrl ? rawUrl : displayUrl}
                 />
             </div>
             <ul className="nav nav-pills">
@@ -141,29 +108,21 @@ export const RestRequestForm = ({
                 {currentTab === "Query" && (
                     <KeyValueTab
                         title="Query Parameters"
-                        keyValEntries={queries}
-                        onChange={setQueries}
+                        keyValEntries={request.queryParams}
+                        onChange={(entries) => {
+                            setRequest({
+                                ...request,
+                                queryParams: entries,
+                            });
+                        }}
                     />
                 )}
                 {currentTab === "Headers" && (
                     <KeyValueTab
                         title="Headers"
-                        keyValEntries={Object.entries(request.headers).map(
-                            ([key, value]) => ({
-                                key,
-                                value,
-                                active: true,
-                            }),
-                        )}
+                        keyValEntries={request.headers}
                         onChange={(entries) => {
-                            const newHeaders: Headers = {};
-                            entries
-                                .filter((e) => e.active)
-                                .filter((e) => e.value.trim() !== "")
-                                .forEach((e) => {
-                                    newHeaders[e.key] = e.value;
-                                });
-                            setRequest({ ...request, headers: newHeaders });
+                            setRequest({ ...request, headers: entries });
                         }}
                     />
                 )}
@@ -181,10 +140,31 @@ export const RestRequestForm = ({
                 )}
             </div>
             <pre>{JSON.stringify(request, null, 2)}</pre>
-            <pre>{JSON.stringify(queries, null, 2)}</pre>
         </>
     );
 };
 
 const ALLOWED_TABS = ["Query", "Headers", "Auth", "Body"] as const;
 type Tab = (typeof ALLOWED_TABS)[number];
+
+const parseBaseUrl = (noHttpPrefixUrl: string): string => {
+    const paramStart = noHttpPrefixUrl.indexOf("?");
+    if (paramStart !== -1) {
+        return noHttpPrefixUrl.substring(0, paramStart);
+    }
+    return noHttpPrefixUrl;
+};
+
+const parseQueryParams = (url: string): Map<string, string> => {
+    const paramStart = url.indexOf("?");
+    const ans = new Map();
+    if (paramStart === -1) {
+        return ans;
+    }
+    const paramStrings = url.substring(paramStart + 1).split("&");
+    paramStrings
+        .map((s) => s.split("="))
+        .filter((parts) => parts.length === 2)
+        .forEach((parts) => ans.set(parts[0], parts[1]));
+    return ans;
+};

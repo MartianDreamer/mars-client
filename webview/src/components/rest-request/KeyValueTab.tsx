@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Query } from "./types.js";
+import type { Query } from "../../../../shared/types";
 
 export const KeyValueTab = ({
     onChange,
