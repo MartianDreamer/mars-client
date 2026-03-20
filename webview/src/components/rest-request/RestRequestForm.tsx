@@ -1,9 +1,5 @@
-import { useMemo, useState } from "react";
-import {
-    type Query,
-    type Request,
-    STANDARD_METHODS,
-} from "../../../../shared/types";
+import { useEffect, useRef, useState } from "react";
+import { type Request, STANDARD_METHODS } from "../../../../shared/types";
 import { buildUrl } from "../../../../shared/util";
 import { BodyTab } from "./BodyTab";
 import { KeyValueTab } from "./KeyValueTab";
@@ -16,11 +12,44 @@ export const RestRequestForm = ({
     setRequest: (request: Request) => void;
 }) => {
     const [currentTab, setCurrentTab] = useState<Tab>("Query");
-    const [editingUrl, setEditingUrl] = useState(false);
-    const [rawUrl, setRawUrl] = useState(request.url);
-    const displayUrl = useMemo(() => {
-        return buildUrl(request.url, request.queryParams);
-    }, [request.url, request.queryParams]);
+    const [url, setUrl] = useState(
+        buildUrl(request.baseUrl, request.queryParams),
+    );
+    const [addingTag, setAddingTag] = useState(false);
+    const tagInputRef = useRef<HTMLInputElement>(null);
+
+    const doUpdateAfterEditingUrl = () => {
+        const newQueries = parseQueryParams(url);
+        const queryParams = [...request.queryParams];
+        const baseUrl = parseBaseUrl(url);
+        queryParams.forEach((q) => {
+            if (newQueries.has(q.key)) {
+                q.active = true;
+                q.value = newQueries.get(q.key) || "";
+            } else {
+                q.active = false;
+            }
+        });
+        for (const [key, value] of newQueries.entries()) {
+            if (queryParams.find((q) => q.key === key) === undefined) {
+                queryParams.push({
+                    active: true,
+                    key,
+                    value,
+                });
+            }
+        }
+        setRequest({
+            ...request,
+            baseUrl: baseUrl,
+            queryParams,
+        });
+        setUrl(buildUrl(baseUrl, queryParams));
+    };
+
+    useEffect(() => {
+        setUrl(buildUrl(request.baseUrl, request.queryParams));
+    }, [request.queryParams, request.baseUrl]);
 
     return (
         <>
@@ -54,39 +83,80 @@ export const RestRequestForm = ({
                     className="form-control"
                     aria-label="Text input with dropdown button"
                     placeholder="Enter URL"
-                    onFocus={() => setEditingUrl(true)}
                     onBlur={() => {
-                        const newQueries = parseQueryParams(rawUrl);
-                        const queryParams = [...request.queryParams];
-                        queryParams.forEach((q) => {
-                            if (newQueries.has(q.key)) {
-                                q.active = true;
-                                q.value = newQueries.get(q.key) || "";
-                            }
-                        });
-                        for (const [key, value] of newQueries.entries()) {
-                            if (
-                                queryParams.find((q) => q.key === key) ===
-                                undefined
-                            ) {
-                                queryParams.push({
-                                    active: true,
-                                    key,
-                                    value,
+                        doUpdateAfterEditingUrl();
+                    }}
+                    onKeyUp={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            doUpdateAfterEditingUrl();
+                        }
+                    }}
+                    onChange={(e) => setUrl(e.target.value)}
+                    value={url}
+                />
+            </div>
+            <div className="my-2 d-flex justify-content-end">
+                {addingTag ? (
+                    <input
+                        className="rounded-4 border border-5 border-dark me-2"
+                        style={{ maxWidth: "90px", fontSize: "0.875rem" }}
+                        placeholder="Tag"
+                        onBlur={(e) => {
+                            e.preventDefault();
+                            setAddingTag(false);
+                            if (e.target.value.trim() !== "") {
+                                setRequest({
+                                    ...request,
+                                    tags: [...request.tags, e.target.value],
                                 });
                             }
-                        }
-                        setRequest({
-                            ...request,
-                            url: parseBaseUrl(rawUrl),
-                            queryParams,
-                        });
-                        setRawUrl(parseBaseUrl(rawUrl))
-                        setEditingUrl(false);
-                    }}
-                    onChange={(e) => setRawUrl(e.target.value)}
-                    value={editingUrl ? rawUrl : displayUrl}
-                />
+                        }}
+                        ref={tagInputRef}
+                    />
+                ) : (
+                    <a
+                        className="btn btn-dark rounded-4 me-2"
+                        style={{
+                            fontSize: "0.875rem",
+                        }}
+                        href="#"
+                        role="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setAddingTag(true);
+                            setTimeout(() => {
+                                tagInputRef.current?.focus();
+                            }, 50);
+                        }}
+                    >
+                        <i className="nf nf-fa-plus" />
+                    </a>
+                )}
+
+                {request.tags.map((tag) => (
+                    <a
+                        className="btn btn-dark rounded-4 me-1"
+                        style={{
+                            fontSize: "0.875rem",
+                        }}
+                        href="#"
+                        role="button"
+                        key={tag}
+                    >
+                        <span className="me-2">{tag}</span>
+                        <i
+                            className="nf nf-fa-trash"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setRequest({
+                                    ...request,
+                                    tags: request.tags.filter((e) => e !== tag),
+                                });
+                            }}
+                        />
+                    </a>
+                ))}
             </div>
             <ul className="nav nav-pills">
                 {ALLOWED_TABS.map((tab) => (
@@ -168,3 +238,5 @@ const parseQueryParams = (url: string): Map<string, string> => {
         .forEach((parts) => ans.set(parts[0], parts[1]));
     return ans;
 };
+
+type EditState = "initial" | "edit" | "complete";

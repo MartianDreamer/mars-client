@@ -53,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
                 integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
                 crossorigin="anonymous"
                 ></script>
+                <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
                 <title>webview</title>
                 <script type="module" crossorigin src="${scriptUri}"></script>
                 <link rel="stylesheet" crossorigin href="${cssUri}">

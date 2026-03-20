@@ -31,11 +31,7 @@ export const BodyTab = ({
                 ))}
             </ul>
             <div
-                className="mt-2"
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                }}
+                className="mt-2 d-flex justify-content-between"
             >
                 <p
                     style={{

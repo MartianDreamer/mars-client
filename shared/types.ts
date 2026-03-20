@@ -59,7 +59,7 @@ export interface Request {
     method: HttpMethod;
     headers: Query[];
     body?: string;
-    url: string;
+    baseUrl: string;
     file?: File;
     tags: string[];
     queryParams: Query[];

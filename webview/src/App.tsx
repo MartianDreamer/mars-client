@@ -6,16 +6,32 @@ import type { Request } from "../../shared/types";
 function App() {
     const [request, setRequest] = useState<Request>({
         method: "GET",
-        url: "",
+        baseUrl: "baseapi.test",
         headers: [],
-        queryParams: [],
-        tags: [],
+        queryParams: [
+            {
+                active: true,
+                key: "q1",
+                value: "1",
+            },
+            {
+                active: false,
+                key: "q2",
+                value: "2",
+            },
+            {
+                active: true,
+                key: "q3",
+                value: "3",
+            },
+        ],
+        tags: ["create user apis"],
     });
 
     return (
-        <>
+        <div className="p-4">
             <RestRequestForm request={request} setRequest={setRequest} />
-        </>
+        </div>
     );
 }
 
