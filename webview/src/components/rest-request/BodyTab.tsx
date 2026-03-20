@@ -30,9 +30,7 @@ export const BodyTab = ({
                     </li>
                 ))}
             </ul>
-            <div
-                className="mt-2 d-flex justify-content-between"
-            >
+            <div className="mt-2 d-flex justify-content-between">
                 <p
                     style={{
                         fontSize: "1rem",
@@ -72,9 +70,7 @@ export const BodyTab = ({
                     className="form-control"
                     placeholder="Body content"
                     id="floatingTextarea2"
-                    style={{
-                        height: "100%",
-                    }}
+                    rows={10}
                     value={content ?? ""}
                     onChange={(e) => onChangeContent(e.target.value)}
                 ></textarea>

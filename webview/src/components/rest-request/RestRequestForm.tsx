@@ -3,6 +3,7 @@ import { type Request, STANDARD_METHODS } from "../../../../shared/types";
 import { buildUrl } from "../../../../shared/util";
 import { BodyTab } from "./BodyTab";
 import { KeyValueTab } from "./KeyValueTab";
+import { AuthTab } from "./AuthTab";
 
 export const RestRequestForm = ({
     request,
@@ -99,7 +100,7 @@ export const RestRequestForm = ({
             <div className="my-2 d-flex justify-content-end">
                 {addingTag ? (
                     <input
-                        className="rounded-4 border border-5 border-dark me-2"
+                        className="rounded-4 me-2 form-control"
                         style={{ maxWidth: "90px", fontSize: "0.875rem" }}
                         placeholder="Tag"
                         onBlur={(e) => {
@@ -196,7 +197,7 @@ export const RestRequestForm = ({
                         }}
                     />
                 )}
-                {currentTab === "Auth" && <div>Auth</div>}
+                {currentTab === "Auth" && <AuthTab auth={request.auth} />}
                 {currentTab === "Body" && (
                     <BodyTab
                         content={request.body}
@@ -238,5 +239,3 @@ const parseQueryParams = (url: string): Map<string, string> => {
         .forEach((parts) => ans.set(parts[0], parts[1]));
     return ans;
 };
-
-type EditState = "initial" | "edit" | "complete";

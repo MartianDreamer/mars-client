@@ -53,7 +53,11 @@ export const ALL_HTTP_METHODS = [
 
 export type HttpMethod = (typeof ALL_HTTP_METHODS)[number];
 
-export type BodyType = "none" | "text" | "json" | "form-data" | "binary";
+export const AUTH_NONE = "NONE";
+export const AUTH_BASIC = "BASIC";
+export const AUTH_TOKEN = "TOKEN";
+export const AUTH_TYPES = [AUTH_NONE, AUTH_BASIC, AUTH_TOKEN] as const;
+export type AuthenticationType = (typeof AUTH_TYPES)[number];
 
 export interface Request {
     method: HttpMethod;
@@ -63,10 +67,26 @@ export interface Request {
     file?: File;
     tags: string[];
     queryParams: Query[];
+    auth: AuthenticationData;
 }
 
 export interface Query {
     key: string;
     value: string;
     active: boolean;
+}
+
+export interface BasicAuthentication {
+    username: string;
+    password: string;
+}
+
+export interface TokenAuthentication {
+    token: string;
+    prefix?: string;
+}
+
+export interface AuthenticationData {
+    type: AuthenticationType;
+    content: BasicAuthentication | TokenAuthentication | undefined;
 }
