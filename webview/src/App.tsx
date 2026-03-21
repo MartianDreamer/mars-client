@@ -1,13 +1,24 @@
 import { useState } from "react";
 import "./App.css";
 import { RestRequestForm } from "./components/rest-request/RestRequestForm";
-import type { Request } from "../../shared/types";
+import { AUTH_NONE, type Request } from "../../shared/types";
 
 function App() {
     const [request, setRequest] = useState<Request>({
         method: "GET",
         baseUrl: "baseapi.test",
-        headers: [],
+        headers: [
+            {
+                active: true,
+                key: "h1",
+                value: "1",
+            },
+            {
+                active: false,
+                key: "h2",
+                value: "2",
+            },
+        ],
         queryParams: [
             {
                 active: true,
@@ -26,6 +37,9 @@ function App() {
             },
         ],
         tags: ["create user apis"],
+        auth: {
+            type: AUTH_NONE,
+        },
     });
 
     return (

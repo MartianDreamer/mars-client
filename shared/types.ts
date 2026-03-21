@@ -88,5 +88,5 @@ export interface TokenAuthentication {
 
 export interface AuthenticationData {
     type: AuthenticationType;
-    content: BasicAuthentication | TokenAuthentication | undefined;
+    content?: BasicAuthentication | TokenAuthentication;
 }
