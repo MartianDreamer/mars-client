@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { type Request, STANDARD_METHODS } from "../../../../shared/types";
+import {
+    type AuthenticationData,
+    type Request,
+    STANDARD_METHODS,
+} from "../../../../shared/types";
 import { buildUrl } from "../../../../shared/util";
 import { BodyTab } from "./BodyTab";
 import { KeyValueTab } from "./KeyValueTab";
@@ -198,7 +202,17 @@ export const RestRequestForm = ({
                         }}
                     />
                 )}
-                {currentTab === "Auth" && <AuthTab auth={request.auth} />}
+                {currentTab === "Auth" && (
+                    <AuthTab
+                        auth={request.auth}
+                        setAuth={(auth: AuthenticationData) =>
+                            setRequest({
+                                ...request,
+                                auth,
+                            })
+                        }
+                    />
+                )}
                 {currentTab === "Body" && (
                     <BodyTab
                         content={request.body}

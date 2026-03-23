@@ -7,7 +7,7 @@ import {
     type AuthenticationType,
 } from "../../../../shared/types";
 
-export const AuthTab = ({ auth }: { auth: AuthenticationData }) => {
+export const AuthTab = ({ auth, setAuth }: { auth: AuthenticationData, setAuth: (auth: AuthenticationData) => void }) => {
     const [currentTab, setCurrentTab] = useState<Tab>(ALLOWED_TABS[0]);
 
     return (
