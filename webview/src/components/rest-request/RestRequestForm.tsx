@@ -49,6 +49,7 @@ export const RestRequestForm = ({
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUrl(buildUrl(request.baseUrl, request.queryParams));
     }, [request.queryParams, request.baseUrl]);
 

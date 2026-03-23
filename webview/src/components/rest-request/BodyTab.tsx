@@ -103,6 +103,7 @@ const FORMAT_FUNTIONS = [
                 const parsed = JSON.parse(content);
                 return JSON.stringify(parsed, null, 2);
             } catch (e) {
+                console.warn("failed to stringify", e)
                 return content;
             }
         },
