@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import { RestRequestForm } from "./components/rest-request/RestRequestForm";
-import { AUTH_NONE, type Request } from "../../shared/types";
+import { type Request } from "../../shared/types";
 
 function App() {
     const [request, setRequest] = useState<Request>({
@@ -37,9 +37,7 @@ function App() {
             },
         ],
         tags: ["create user apis"],
-        auth: {
-            type: AUTH_NONE,
-        },
+        auth: {},
     });
 
     return (
