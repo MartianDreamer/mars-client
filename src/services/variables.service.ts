@@ -33,10 +33,11 @@ const emitChange = () => {
 
 export const variablesService = {
     resolve(key: string, depth = 0): string {
-        if (depth > 20)
+        if (depth > 20) {
             throw new Error("Circular dependency detected", {
                 cause: "CircularDependency",
             });
+        }
 
         let ans: string | undefined = undefined;
         const storages = [
