@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-    function acquireVsCodeApi<T = any, R = unknown>(): {
+    function acquireVsCodeApi<T = unknown, R>(): {
         postMessage: (message: R) => void;
         getState: () => T;
         setState: (state: T) => void;

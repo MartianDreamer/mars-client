@@ -101,6 +101,14 @@ export const RestRequestForm = ({
                     onChange={(e) => setUrl(e.target.value)}
                     value={url}
                 />
+                <button
+                    className="btn btn-success"
+                    type="button"
+                    id="button-addon2"
+                    onClick={() => console.log(request)}
+                >
+                    Send
+                </button>
             </div>
             <div className="my-2 d-flex justify-content-end">
                 {addingTag ? (
@@ -225,7 +233,6 @@ export const RestRequestForm = ({
                     />
                 )}
             </div>
-            <pre>{JSON.stringify(request, null, 2)}</pre>
         </>
     );
 };
